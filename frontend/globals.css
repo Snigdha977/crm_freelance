@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-fraunces: "Fraunces", serif;
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+body {
+  background-color: #f6f2e9;
+  color: #1c2541;
+}
+
+.ledger-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 38px,
+    rgba(28, 37, 65, 0.08) 39px
+  );
+}
+
+.card-index {
+  box-shadow: 0 1px 0 rgba(28, 37, 65, 0.06), 0 8px 24px -12px rgba(28, 37, 65, 0.25);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid #a9773d;
+  outline-offset: 2px;
+}
