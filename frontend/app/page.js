@@ -1,225 +1,140 @@
-"use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { api } from "../../lib/api";
+  import Link from "next/link";
 
-const STAGES = ["lead", "contacted", "proposal", "won", "lost"];
-const STAGE_LABELS = {
-  lead: "Lead",
-  contacted: "Contacted",
-  proposal: "Proposal",
-  won: "Won",
-  lost: "Lost",
-};
+function IndexCardStack() {
+  return (
+    <svg viewBox="0 0 360 260" className="w-full max-w-md" aria-hidden="true">
+      <rect x="40" y="60" width="260" height="150" rx="6" fill="#EDE6D6" stroke="#1C2541" strokeOpacity="0.15" transform="rotate(-4 170 135)" />
+      <rect x="30" y="45" width="260" height="150" rx="6" fill="#F6F2E9" stroke="#1C2541" strokeOpacity="0.2" transform="rotate(2 160 120)" />
+      <rect x="35" y="30" width="260" height="150" rx="6" fill="#FFFDF8" stroke="#1C2541" strokeOpacity="0.3" />
+      <line x1="55" y1="60" x2="290" y2="60" stroke="#A9773D" strokeWidth="2" />
+      <text x="55" y="90" fontFamily="var(--font-fraunces)" fontSize="18" fill="#1C2541">Priya Shah</text>
+      <text x="55" y="112" fontFamily="var(--font-mono)" fontSize="12" fill="#5C7A63">Proposal sent — $4,200</text>
+      <text x="55" y="132" fontFamily="var(--font-mono)" fontSize="12" fill="#1C2541" opacity="0.6">priya@northlightstudio.co</text>
+      <circle cx="270" cy="45" r="6" fill="#A9773D" />
+    </svg>
+  );
+}
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [contacts, setContacts] = useState([]);
-  const [deals, setDeals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const features = [
+  { title: "Contacts, not columns", body: "Every person you work with gets a real card: notes, history, deals attached — not a spreadsheet row that loses context." },
+  { title: "A pipeline you can see", body: "Move deals from lead to won across five stages. No CRM theory, just where things actually stand." },
+  { title: "Nothing resets on refresh", body: "Every contact, deal, and note is saved to your account the moment you make it." },
+];
 
-  const [contactForm, setContactForm] = useState({ name: "", email: "", company: "" });
-  const [dealForm, setDealForm] = useState({ title: "", value: "", contactId: "" });
+const plans = [
+  {
+    name: "Starter",
+    price: "$0",
+    period: "forever",
+    description: "For getting your first contacts and deals organized.",
+    features: ["Up to 10 contacts", "Unlimited deals & pipeline stages", "1 user"],
+    cta: "Start free",
+    href: "/signup",
+    highlight: false,
+  },
+  {
+    name: "Pro",
+    price: "$12",
+    period: "/month",
+    description: "For solopreneurs whose contact list outgrew a spreadsheet.",
+    features: ["Unlimited contacts", "Unlimited deals & pipeline stages", "Priority support"],
+    cta: "Start with Pro",
+    href: "/signup?plan=pro",
+    highlight: true,
+  },
+];
 
-  async function loadAll() {
-    try {
-      const [me, contactsRes, dealsRes] = await Promise.all([api.me(), api.listContacts(), api.listDeals()]);
-      setUser(me.user);
-      setContacts(contactsRes.contacts);
-      setDeals(dealsRes.deals);
-    } catch (err) {
-      router.push("/login");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadAll();
-  }, []);
-
-  async function handleAddContact(e) {
-    e.preventDefault();
-    setError("");
-    try {
-      const { contact } = await api.createContact(contactForm);
-      setContacts([contact, ...contacts]);
-      setContactForm({ name: "", email: "", company: "" });
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  async function handleAddDeal(e) {
-    e.preventDefault();
-    setError("");
-    try {
-      const { deal } = await api.createDeal({
-        ...dealForm,
-        value: dealForm.value ? Number(dealForm.value) : 0,
-        contactId: dealForm.contactId || null,
-      });
-      setDeals([deal, ...deals]);
-      setDealForm({ title: "", value: "", contactId: "" });
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  async function moveDeal(id, stage) {
-    const { deal } = await api.updateDeal(id, { stage });
-    setDeals(deals.map((d) => (d.id === id ? deal : d)));
-  }
-
-  async function removeContact(id) {
-    await api.deleteContact(id);
-    setContacts(contacts.filter((c) => c.id !== id));
-  }
-
-  async function removeDeal(id) {
-    await api.deleteDeal(id);
-    setDeals(deals.filter((d) => d.id !== id));
-  }
-
-  async function handleLogout() {
-    await api.logout();
-    router.push("/");
-  }
-
-  if (loading) {
-    return <main className="flex min-h-screen items-center justify-center bg-paper text-ink/60">Loading your ledger…</main>;
-  }
-
+export default function LandingPage() {
   return (
     <main className="min-h-screen bg-paper">
-      <header className="flex items-center justify-between border-b border-ink/10 px-6 py-4">
-        <Link href="/" className="font-display text-xl text-ink">Ledger</Link>
-        <div className="flex items-center gap-4 text-sm text-ink/70">
-          <span className="rounded-full bg-ink/5 px-3 py-1 font-mono uppercase tracking-wide">
-            {user?.plan === "pro" ? "Pro plan" : "Free plan"}
-          </span>
-          <Link href="/dashboard/billing" className="hover:text-ink">Billing</Link>
-          <button onClick={handleLogout} className="hover:text-ink">Log out</button>
-        </div>
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+        <span className="font-display text-xl font-medium text-ink">Ledger</span>
+        <nav className="flex items-center gap-6 text-sm text-ink/80">
+          <a href="#pricing" className="hover:text-ink">Pricing</a>
+          <Link href="/login" className="hover:text-ink">Log in</Link>
+          <Link href="/signup" className="rounded-full bg-ink px-4 py-2 text-paper transition hover:bg-ink/90">
+            Get started
+          </Link>
+        </nav>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        {error && <p className="mb-6 rounded-lg bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
-
-        <section className="mb-12">
-          <h2 className="font-display text-2xl text-ink">Contacts</h2>
-          <form onSubmit={handleAddContact} className="mt-4 flex flex-wrap gap-3">
-            <input
-              placeholder="Name"
-              required
-              value={contactForm.name}
-              onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-              className="rounded-lg border border-ink/20 bg-white px-3 py-2 text-sm outline-none focus:border-brass"
-            />
-            <input
-              placeholder="Email"
-              value={contactForm.email}
-              onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-              className="rounded-lg border border-ink/20 bg-white px-3 py-2 text-sm outline-none focus:border-brass"
-            />
-            <input
-              placeholder="Company"
-              value={contactForm.company}
-              onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
-              className="rounded-lg border border-ink/20 bg-white px-3 py-2 text-sm outline-none focus:border-brass"
-            />
-            <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/90">
-              Add contact
-            </button>
-          </form>
-
-          <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-            {contacts.map((c) => (
-              <div key={c.id} className="card-index rounded-xl bg-white p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-display text-lg text-ink">{c.name}</p>
-                    {c.company && <p className="text-xs text-ink/50">{c.company}</p>}
-                    {c.email && <p className="mt-1 font-mono text-xs text-ink/60">{c.email}</p>}
-                  </div>
-                  <button onClick={() => removeContact(c.id)} className="text-xs text-ink/40 hover:text-rose">
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-            {contacts.length === 0 && <p className="text-sm text-ink/50">No contacts yet — add your first one above.</p>}
+      <section className="ledger-lines mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 py-16 md:grid-cols-2 md:py-24">
+        <div>
+          <p className="mb-4 font-mono text-sm uppercase tracking-widest text-brass">For people who work alone</p>
+          <h1 className="font-display text-4xl leading-tight text-ink md:text-5xl">
+            Every client. Every deal.<br />One quiet ledger.
+          </h1>
+          <p className="mt-6 max-w-md text-lg text-ink/70">
+            Ledger is the CRM for solopreneurs who need to remember who they're talking to and where each deal
+            stands — without learning a platform built for a sales team of forty.
+          </p>
+          <div className="mt-8 flex items-center gap-4">
+            <Link href="/signup?plan=pro" className="rounded-full bg-brass px-6 py-3 font-medium text-paper transition hover:bg-brass/90">
+              Start free trial
+            </Link>
+            <a href="#pricing" className="font-medium text-ink/70 hover:text-ink">See pricing →</a>
           </div>
-        </section>
+        </div>
+        <div className="flex justify-center">
+          <IndexCardStack />
+        </div>
+      </section>
 
-        <section>
-          <h2 className="font-display text-2xl text-ink">Pipeline</h2>
-          <form onSubmit={handleAddDeal} className="mt-4 flex flex-wrap gap-3">
-            <input
-              placeholder="Deal title"
-              required
-              value={dealForm.title}
-              onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
-              className="rounded-lg border border-ink/20 bg-white px-3 py-2 text-sm outline-none focus:border-brass"
-            />
-            <input
-              placeholder="Value ($)"
-              type="number"
-              value={dealForm.value}
-              onChange={(e) => setDealForm({ ...dealForm, value: e.target.value })}
-              className="w-28 rounded-lg border border-ink/20 bg-white px-3 py-2 text-sm outline-none focus:border-brass"
-            />
-            <select
-              value={dealForm.contactId}
-              onChange={(e) => setDealForm({ ...dealForm, contactId: e.target.value })}
-              className="rounded-lg border border-ink/20 bg-white px-3 py-2 text-sm outline-none focus:border-brass"
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          {features.map((f) => (
+            <div key={f.title} className="rounded-2xl border border-ink/10 bg-white/60 p-6">
+              <h3 className="font-display text-lg text-ink">{f.title}</h3>
+              <p className="mt-2 text-sm text-ink/70">{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="pricing" className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mb-10 text-center">
+          <h2 className="font-display text-3xl text-ink">Simple pricing, no seats math</h2>
+          <p className="mt-2 text-ink/60">Start free. Upgrade the day your contact list needs room to grow.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+          {plans.map((plan) => (
+            <div
+              key={plan.name}
+              className={`card-index rounded-2xl border p-8 ${
+                plan.highlight ? "border-brass bg-ink text-paper" : "border-ink/10 bg-white/70 text-ink"
+              }`}
             >
-              <option value="">No contact</option>
-              {contacts.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/90">
-              Add deal
-            </button>
-          </form>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-5">
-            {STAGES.map((stage) => (
-              <div key={stage} className="rounded-xl bg-ink/5 p-3">
-                <p className="mb-3 font-mono text-xs uppercase tracking-wide text-ink/50">{STAGE_LABELS[stage]}</p>
-                <div className="space-y-2">
-                  {deals.filter((d) => d.stage === stage).map((d) => (
-                    <div key={d.id} className="card-index rounded-lg bg-white p-3">
-                      <p className="text-sm font-medium text-ink">{d.title}</p>
-                      {d.value > 0 && <p className="font-mono text-xs text-sage">${d.value.toLocaleString()}</p>}
-                      {d.contact && <p className="text-xs text-ink/50">{d.contact.name}</p>}
-                      <div className="mt-2 flex items-center justify-between">
-                        <select
-                          value={d.stage}
-                          onChange={(e) => moveDeal(d.id, e.target.value)}
-                          className="rounded border border-ink/10 bg-paper px-1.5 py-1 text-xs"
-                        >
-                          {STAGES.map((s) => (
-                            <option key={s} value={s}>{STAGE_LABELS[s]}</option>
-                          ))}
-                        </select>
-                        <button onClick={() => removeDeal(d.id)} className="text-xs text-ink/40 hover:text-rose">
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <h3 className="font-display text-2xl">{plan.name}</h3>
+              <p className={`mt-1 text-sm ${plan.highlight ? "text-paper/70" : "text-ink/60"}`}>{plan.description}</p>
+              <div className="mt-6 flex items-baseline gap-1">
+                <span className="font-display text-4xl">{plan.price}</span>
+                <span className={`text-sm ${plan.highlight ? "text-paper/60" : "text-ink/50"}`}>{plan.period}</span>
               </div>
-            ))}
-          </div>
-        </section>
-      </div>
+              <ul className="mt-6 space-y-2 text-sm">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2">
+                    <span className={plan.highlight ? "text-brass" : "text-sage"}>—</span> {f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={plan.href}
+                className={`mt-8 block rounded-full px-6 py-3 text-center font-medium transition ${
+                  plan.highlight ? "bg-brass text-paper hover:bg-brass/90" : "bg-ink text-paper hover:bg-ink/90"
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="border-t border-ink/10 py-8 text-center text-sm text-ink/50">
+        Ledger — built for one-person businesses.
+      </footer>
     </main>
   );
 }
+
